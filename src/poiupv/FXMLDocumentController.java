@@ -5,6 +5,7 @@
  */
 package poiupv;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,11 +19,15 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -35,15 +40,19 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import poiupv.Poi;
 
 /**
  *
@@ -51,29 +60,28 @@ import poiupv.Poi;
  */
 public class FXMLDocumentController implements Initializable {
 
-    //=======================================
-    // hashmap para guardar los puntos de interes POI
-    private final HashMap<String, Poi> hm = new HashMap<>();
-    private ObservableList<Poi> data;
-    // ======================================
     // la variable zoomGroup se utiliza para dar soporte al zoom
     // el escalado se realiza sobre este nodo, al escalar el Group no mueve sus nodos
     private Group zoomGroup;
+    private double TransX, TransY;
 
-    @FXML
-    private ListView<Poi> map_listview;
     @FXML
     private ScrollPane map_scrollpane;
     @FXML
     private Slider zoom_slider;
     
-    private MenuItem pin_info;
     @FXML
     private SplitPane splitPane;
     @FXML
     private Label mousePosition;
     @FXML
     private ToggleGroup paintingOptions;
+    @FXML
+    private Button transportador;
+    @FXML
+    private ToggleButton pointButton;
+    @FXML
+    private Pane card;
 
     void zoomIn(ActionEvent event) {
         //================================================
@@ -104,18 +112,6 @@ public class FXMLDocumentController implements Initializable {
         map_scrollpane.setVvalue(scrollV);
     }
 
-    @FXML
-    void listClicked(MouseEvent event) {
-        
-    }
-
-    private void initData() {
-        data=map_listview.getItems();
-        data.add(new Poi("1F", "Edificion del DSIC", 275, 250));
-        data.add( new Poi("Agora", "Agora", 575, 350));
-        data.add( new Poi("Pista", "Pista de atletismo y campo de futbol", 950, 350));
-    }
-
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         //Code from ChatGPT to avoid getting the focuss on any button when open
@@ -137,6 +133,8 @@ public class FXMLDocumentController implements Initializable {
         contentGroup.getChildren().add(zoomGroup);
         zoomGroup.getChildren().add(map_scrollpane.getContent());
         map_scrollpane.setContent(contentGroup);
+        
+        //initialize the A-lists
 
     }
 
@@ -151,24 +149,72 @@ public class FXMLDocumentController implements Initializable {
     }
 
     @FXML
-    private void about(ActionEvent event) {
-        Alert mensaje = new Alert(Alert.AlertType.INFORMATION);
-        // Acceder al Stage del Dialog y cambiar el icono
-        Stage dialogStage = (Stage) mensaje.getDialogPane().getScene().getWindow();
-        dialogStage.getIcons().add(new Image(getClass().getResourceAsStream("/resources/logo.png")));
-        mensaje.setTitle("Acerca de");
-        mensaje.setHeaderText("IPC - 2025");
-        mensaje.showAndWait();
-    }
-
-    @FXML
-    private void zoomScroll(ScrollEvent event) {
+    private void zoomScroll(ScrollEvent e) {
         
         //apply the scroll to the zoom
         double sliderVal = zoom_slider.getValue();
-        zoom_slider.setValue(sliderVal + (event.getDeltaY() * 0.001));
+        zoom_slider.setValue(sliderVal + (e.getDeltaY() * 0.001));
         
         //avoid moving the map
-         event.consume();
+         e.consume();
     }
+    
+    //Movement of trnsportador, it DOESNT work. The sensibility is insainly high 
+    //if you move the mouse 1px it goes to x = 1000000
+
+    @FXML
+    private void moveTrasportador(MouseEvent e) {
+        //transportador.setTranslateX(e.getX()+ transportador.getLayoutX() -TransX);
+        //transportador.setTranslateY(e.getY()+ transportador.getLayoutX() -TransY);
+    }
+
+    private void TrasportadorClck(MouseEvent e) {
+        TransX = e.getX();
+        TransY = e.getY();
+    }
+
+    @FXML
+    private void mapClicked(MouseEvent e) {
+        if(e.getButton()==MouseButton.PRIMARY){
+            if(pointButton.isSelected()){
+                Button b = new Button();
+                b.setLayoutX(e.getX());
+                b.setLayoutY(e.getY());
+                b.setStyle("-fx-background-color: #000000;");
+                card.getChildren().add(b);
+            }
+            e.consume();
+        }
+    }
+
+    @FXML
+    private void iniciarSe(ActionEvent e) throws IOException {
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("/tarea2/vista/VistaPersona.fxml"));
+        Parent root = loader.load();
+        
+        Scene scene = new Scene(root);
+        
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(scene);
+        stage.setTitle("Iniciar Sesión");
+        stage.showAndWait();
+        //VistaPersonaController controlador2 = loader.getController();
+    }
+
+    @FXML
+    private void registrarse(ActionEvent e) throws IOException {
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("/tarea2/vista/VistaPersona.fxml"));
+        Parent root = loader.load();
+        
+        Scene scene = new Scene(root);
+        
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(scene);
+        stage.setTitle("Registrarse");
+        stage.showAndWait();
+        //VistaPersonaController controlador2 = loader.getController();
+    }
+
 }
