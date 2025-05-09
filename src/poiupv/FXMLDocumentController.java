@@ -189,7 +189,7 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void iniciarSe(ActionEvent e) throws IOException {
-        FXMLLoader loader= new FXMLLoader(getClass().getResource("/tarea2/vista/VistaPersona.fxml"));
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("vistas/IniciarSe.fxml"));
         Parent root = loader.load();
         
         Scene scene = new Scene(root);
@@ -199,12 +199,12 @@ public class FXMLDocumentController implements Initializable {
         stage.setScene(scene);
         stage.setTitle("Iniciar Sesión");
         stage.showAndWait();
-        //VistaPersonaController controlador2 = loader.getController();
+        IniciarSeController iniCont = loader.getController();
     }
 
     @FXML
     private void registrarse(ActionEvent e) throws IOException {
-        FXMLLoader loader= new FXMLLoader(getClass().getResource("/tarea2/vista/VistaPersona.fxml"));
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("vistas/Registro.fxml"));
         Parent root = loader.load();
         
         Scene scene = new Scene(root);
@@ -214,7 +214,7 @@ public class FXMLDocumentController implements Initializable {
         stage.setScene(scene);
         stage.setTitle("Registrarse");
         stage.showAndWait();
-        //VistaPersonaController controlador2 = loader.getController();
+       RegistroController regCont = loader.getController();
     }
 
 }
