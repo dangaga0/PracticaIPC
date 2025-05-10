@@ -16,6 +16,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,6 +31,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -50,6 +52,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -64,6 +68,15 @@ public class FXMLDocumentController implements Initializable {
     // el escalado se realiza sobre este nodo, al escalar el Group no mueve sus nodos
     private Group zoomGroup;
     private double TransX, TransY;
+    
+    // Point atributes
+    private Color pointColor;
+    private double pointSize;
+    private Circle previewCircle;
+    
+    //Trasportador atributos
+    private Color transColor;
+    private double transSize;
 
     @FXML
     private ScrollPane map_scrollpane;
@@ -82,19 +95,12 @@ public class FXMLDocumentController implements Initializable {
     private ToggleButton pointButton;
     @FXML
     private Pane card;
-
-    void zoomIn(ActionEvent event) {
-        //================================================
-        // el incremento del zoom dependerá de los parametros del 
-        // slider y del resultado esperado
-        double sliderVal = zoom_slider.getValue();
-        zoom_slider.setValue(sliderVal += 0.1);
-    }
-
-    void zoomOut(ActionEvent event) {
-        double sliderVal = zoom_slider.getValue();
-        zoom_slider.setValue(sliderVal + -0.1);
-    }
+    @FXML
+    private Slider tamañoTrazo;
+    @FXML
+    private ColorPicker colorTrazo;
+    @FXML
+    private ToggleButton transportadorButton;
     
     // esta funcion es invocada al cambiar el value del slider zoom_slider
     private void zoom(double scaleValue) {
@@ -134,14 +140,37 @@ public class FXMLDocumentController implements Initializable {
         zoomGroup.getChildren().add(map_scrollpane.getContent());
         map_scrollpane.setContent(contentGroup);
         
-        //initialize the A-lists
+        //initialize the preview circle
+        previewCircle = new Circle();
+        card.getChildren().add(previewCircle);
+        //default values
+        pointColor = Color.RED;
+        pointSize = 10;
 
+        //trans
+        transportador.styleProperty().bind(Bindings.createStringBinding(() -> 
+        "-fx-pref-width: " + (int)tamañoTrazo.getValue()*100 + ";" +
+        "-fx-pref-height: " + (int)tamañoTrazo.getValue()*100 + ";" +
+        "-fx-content-display: graphic-only;",
+        tamañoTrazo.valueProperty()
+        ));
+        pointColor = Color.RED;
+        pointSize = 10;
+        //default values
+        
     }
 
     @FXML
-    private void showPosition(MouseEvent event) {
-        mousePosition.setText("sceneX: " + (int) event.getSceneX() + ", sceneY: " + (int) event.getSceneY() + "\n"
-                + "         X: " + (int) event.getX() + ",          Y: " + (int) event.getY());
+    private void showPosition(MouseEvent e) {
+        mousePosition.setText("sceneX: " + (int) e.getSceneX() + ", sceneY: " + (int) e.getSceneY() + "\n"
+                + "         X: " + (int) e.getX() + ",          Y: " + (int) e.getY());
+        if(pointButton.isSelected()){
+                previewCircle.setCenterX(e.getX());
+                previewCircle.setCenterY(e.getY());
+                previewCircle.setRadius(tamañoTrazo.getValue());
+                previewCircle.setFill(colorTrazo.getValue());
+        }
+        
     }
 
     private void closeApp(ActionEvent event) {
@@ -159,29 +188,22 @@ public class FXMLDocumentController implements Initializable {
          e.consume();
     }
     
-    //Movement of trnsportador, it DOESNT work. The sensibility is insainly high 
-    //if you move the mouse 1px it goes to x = 1000000
-
-    @FXML
-    private void moveTrasportador(MouseEvent e) {
-        //transportador.setTranslateX(e.getX()+ transportador.getLayoutX() -TransX);
-        //transportador.setTranslateY(e.getY()+ transportador.getLayoutX() -TransY);
-    }
-
-    private void TrasportadorClck(MouseEvent e) {
-        TransX = e.getX();
-        TransY = e.getY();
-    }
 
     @FXML
     private void mapClicked(MouseEvent e) {
         if(e.getButton()==MouseButton.PRIMARY){
             if(pointButton.isSelected()){
-                Button b = new Button();
-                b.setLayoutX(e.getX());
-                b.setLayoutY(e.getY());
-                b.setStyle("-fx-background-color: #000000;");
-                card.getChildren().add(b);
+                Color color = colorTrazo.getValue();
+                pointColor = color;
+                double size = tamañoTrazo.getValue();
+                pointSize = size;
+                Circle circle = new Circle();
+                circle.setCenterX(e.getX());
+                circle.setCenterY(e.getY());
+                circle.setRadius(size);
+                circle.setFill(color);
+
+                card.getChildren().add(circle);
             }
             e.consume();
         }
@@ -214,7 +236,44 @@ public class FXMLDocumentController implements Initializable {
         stage.setScene(scene);
         stage.setTitle("Registrarse");
         stage.showAndWait();
-       RegistroController regCont = loader.getController();
+        RegistroController regCont = loader.getController();
+    }
+
+    @FXML
+    private void pointSelected(ActionEvent event) {
+        colorTrazo.setValue(pointColor);
+        tamañoTrazo.setValue(pointSize);
+        transportador.setVisible(false);
+    }
+
+    @FXML
+    private void transportadorSelected(ActionEvent event) {
+        transportador.setVisible(true);
+        colorTrazo.setValue(transColor);
+        tamañoTrazo.setValue(transSize);
+    }
+
+    @FXML
+    private void mouseMovedMap(MouseEvent e) {
+    }
+
+    //Does not work dont know why
+    @FXML
+    private void transportadorDragged(MouseEvent e) {
+        if(e.getButton()==MouseButton.PRIMARY){
+            transportador.setTranslateX(e.getX()+ transportador.getLayoutX() -TransX);
+            transportador.setTranslateY(e.getY()+ transportador.getLayoutX() -TransY);
+        }
+    }
+
+    @FXML
+    private void transportadorClicked(MouseEvent e) {
+        if(e.getButton()==MouseButton.PRIMARY){
+            TransX = e.getX();
+            TransY = e.getY();
+        }
+        transColor = colorTrazo.getValue();
+        transSize = tamañoTrazo.getValue();
     }
 
 }

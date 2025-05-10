@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToggleButton?>
@@ -41,27 +42,27 @@
                   </VBox>
                </children>
             </AnchorPane>
-            <ScrollPane fx:id="map_scrollpane" hbarPolicy="ALWAYS" hvalue="0.5" onMouseMoved="#showPosition" pannable="true" prefHeight="398.0" prefWidth="358.0" vbarPolicy="ALWAYS" vvalue="0.5">
+            <ScrollPane fx:id="map_scrollpane" hbarPolicy="ALWAYS" hvalue="0.5" pannable="true" prefHeight="398.0" prefWidth="358.0" vbarPolicy="ALWAYS" vvalue="0.5">
                <content>
-                  <StackPane>
+                  <StackPane onScroll="#zoomScroll">
                      <children>
-                        <Pane fx:id="card">
+                        <Pane fx:id="card" onMouseClicked="#mapClicked" onMouseDragged="#mouseMovedMap" onMouseMoved="#showPosition">
                            <children>
-                              <ImageView onMouseClicked="#mapClicked" onScroll="#zoomScroll" pickOnBounds="true">
+                              <ImageView pickOnBounds="true">
                                  <image>
                                     <Image url="@../../resources/carta_nautica.png" />
                                  </image>
                               </ImageView>
                            </children>
                         </Pane>
-                        <Button fx:id="transportador" mnemonicParsing="false" onMouseDragged="#moveTrasportador" styleClass="transportador" text="Button" />
+                        <Button fx:id="transportador" mnemonicParsing="false" onMouseClicked="#transportadorClicked" onMouseDragged="#transportadorDragged" styleClass="transportador" text="Button" visible="false" />
                      </children>
                   </StackPane>
                </content>
             </ScrollPane>
             <VBox alignment="TOP_RIGHT" maxWidth="-Infinity">
                <children>
-                    <ToggleButton fx:id="pointButton">
+                    <ToggleButton fx:id="pointButton" onAction="#pointSelected">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -73,9 +74,12 @@
                         <ToggleGroup fx:id="paintingOptions" />
                      </toggleGroup>
                     </ToggleButton>
-                  <ToggleButton toggleGroup="$paintingOptions">
+                  <ToggleButton fx:id="transportadorButton" onAction="#transportadorSelected" toggleGroup="$paintingOptions">
                      <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../resources/transportador.png" />
+                           </image></ImageView>
                      </graphic>
                   </ToggleButton>
                   <ToggleButton toggleGroup="$paintingOptions">
@@ -90,8 +94,28 @@
                   </ToggleButton>
                   <VBox alignment="BOTTOM_RIGHT" maxWidth="1.7976931348623157E308" prefWidth="0.0" VBox.vgrow="ALWAYS">
                      <children>
-                        <Slider maxWidth="1.7976931348623157E308" orientation="VERTICAL" />
-                        <ColorPicker />
+                        <Separator prefWidth="200.0">
+                           <padding>
+                              <Insets bottom="5.0" top="5.0" />
+                           </padding>
+                        </Separator>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Tamaño" textAlignment="CENTER" wrappingWidth="42.65625">
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </VBox.margin>
+                        </Text>
+                        <Slider fx:id="tamañoTrazo" max="40.0" maxWidth="1.7976931348623157E308" min="1.0" orientation="VERTICAL" value="20.0" />
+                        <Separator prefWidth="200.0">
+                           <padding>
+                              <Insets bottom="5.0" top="5.0" />
+                           </padding>
+                        </Separator>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Color" textAlignment="CENTER" wrappingWidth="44.5703125">
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </VBox.margin>
+                        </Text>
+                        <ColorPicker fx:id="colorTrazo" />
                      </children>
                   </VBox>
                </children>
