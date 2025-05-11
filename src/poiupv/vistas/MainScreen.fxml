@@ -46,13 +46,17 @@
                <content>
                   <StackPane onScroll="#zoomScroll">
                      <children>
-                        <Pane fx:id="card" onMouseClicked="#mapClicked" onMouseDragged="#mouseMovedMap" onMouseMoved="#showPosition">
+                        <Pane fx:id="previwePane" onMouseClicked="#mapClicked" onMouseMoved="#showPosition">
                            <children>
-                              <ImageView pickOnBounds="true">
-                                 <image>
-                                    <Image url="@../../resources/carta_nautica.png" />
-                                 </image>
-                              </ImageView>
+                              <Pane fx:id="card" onMouseDragged="#mouseMovedMap">
+                                 <children>
+                                    <ImageView pickOnBounds="true">
+                                       <image>
+                                          <Image url="@../../resources/carta_nautica.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </Pane>
                            </children>
                         </Pane>
                         <Button fx:id="transportador" mnemonicParsing="false" onMouseClicked="#transportadorClicked" onMouseDragged="#transportadorDragged" styleClass="transportador" text="Button" visible="false" />
@@ -74,22 +78,27 @@
                         <ToggleGroup fx:id="paintingOptions" />
                      </toggleGroup>
                     </ToggleButton>
-                  <ToggleButton fx:id="transportadorButton" onAction="#transportadorSelected" toggleGroup="$paintingOptions">
+                  <ToggleButton fx:id="lineButton" onAction="#lineSelected" toggleGroup="$paintingOptions">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </ToggleButton>
+                  <ToggleButton toggleGroup="$paintingOptions">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </ToggleButton>
+                  <ToggleButton fx:id="eraserButton" toggleGroup="$paintingOptions">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </ToggleButton>
+                  <ToggleButton fx:id="transportadorButton" onAction="#transportadorSelected">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../../resources/transportador.png" />
                            </image></ImageView>
-                     </graphic>
-                  </ToggleButton>
-                  <ToggleButton toggleGroup="$paintingOptions">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </ToggleButton>
-                  <ToggleButton toggleGroup="$paintingOptions">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>
                   </ToggleButton>
                   <VBox alignment="BOTTOM_RIGHT" maxWidth="1.7976931348623157E308" prefWidth="0.0" VBox.vgrow="ALWAYS">

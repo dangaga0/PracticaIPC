@@ -54,6 +54,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -74,9 +75,17 @@ public class FXMLDocumentController implements Initializable {
     private double pointSize;
     private Circle previewCircle;
     
+    //line atributes
+    private Color lineColor;
+    private double lineSize;
+    private Line previewLine;
+    
+    
     //Trasportador atributos
     private Color transColor;
     private double transSize;
+    
+    
 
     @FXML
     private ScrollPane map_scrollpane;
@@ -101,6 +110,12 @@ public class FXMLDocumentController implements Initializable {
     private ColorPicker colorTrazo;
     @FXML
     private ToggleButton transportadorButton;
+    @FXML
+    private ToggleButton eraserButton;
+    @FXML
+    private ToggleButton lineButton;
+    @FXML
+    private Pane previwePane;
     
     // esta funcion es invocada al cambiar el value del slider zoom_slider
     private void zoom(double scaleValue) {
@@ -142,7 +157,7 @@ public class FXMLDocumentController implements Initializable {
         
         //initialize the preview circle
         previewCircle = new Circle();
-        card.getChildren().add(previewCircle);
+        previwePane.getChildren().add(previewCircle);
         //default values
         pointColor = Color.RED;
         pointSize = 10;
@@ -154,9 +169,17 @@ public class FXMLDocumentController implements Initializable {
         "-fx-content-display: graphic-only;",
         tamañoTrazo.valueProperty()
         ));
-        pointColor = Color.RED;
-        pointSize = 10;
         //default values
+        transColor = Color.RED;
+        transSize = 3;
+        
+        //Line
+        previewLine = new Line();
+        previewLine.setVisible(false);
+        previwePane.getChildren().add(previewLine);
+        //default values
+        lineColor = Color.RED;
+        lineSize = 2;
         
     }
 
@@ -170,7 +193,14 @@ public class FXMLDocumentController implements Initializable {
                 previewCircle.setRadius(tamañoTrazo.getValue());
                 previewCircle.setFill(colorTrazo.getValue());
         }
-        
+        if(lineButton.isSelected()){
+            if(previewLine.isVisible()){
+                previewLine.setEndX(e.getX());
+                previewLine.setEndY(e.getY());
+                previewLine.setStrokeWidth(tamañoTrazo.getValue());
+                previewLine.setStroke(colorTrazo.getValue());
+            }
+        }
     }
 
     private void closeApp(ActionEvent event) {
@@ -198,12 +228,38 @@ public class FXMLDocumentController implements Initializable {
                 double size = tamañoTrazo.getValue();
                 pointSize = size;
                 Circle circle = new Circle();
+                circle.setOnMouseClicked(e2 -> {
+                    if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
+                        ((Pane)circle.getParent()).getChildren().remove(circle);
+                    }
+                });
                 circle.setCenterX(e.getX());
                 circle.setCenterY(e.getY());
                 circle.setRadius(size);
                 circle.setFill(color);
 
                 card.getChildren().add(circle);
+            }
+            if(lineButton.isSelected()){
+                if(!previewLine.isVisible()){
+                    previewLine.setStartX(e.getX());
+                    previewLine.setStartY(e.getY());
+                    previewLine.setEndX(e.getX());
+                    previewLine.setEndY(e.getY());
+                    previewLine.setVisible(true);
+                    
+                }else{
+                    Color color = colorTrazo.getValue();
+                    lineColor = color;
+                    double size = tamañoTrazo.getValue();
+                    lineSize = size;
+                    Line line = new Line(previewLine.getStartX(),previewLine.getStartY(),e.getX(),e.getY());
+                    line.setStrokeWidth(size);
+                    line.setStroke(color);
+                    
+                    card.getChildren().add(line);
+                    previewLine.setVisible(false);
+                }
             }
             e.consume();
         }
@@ -243,18 +299,24 @@ public class FXMLDocumentController implements Initializable {
     private void pointSelected(ActionEvent event) {
         colorTrazo.setValue(pointColor);
         tamañoTrazo.setValue(pointSize);
-        transportador.setVisible(false);
+        previewCircle.setVisible(true);
     }
 
     @FXML
     private void transportadorSelected(ActionEvent event) {
-        transportador.setVisible(true);
-        colorTrazo.setValue(transColor);
-        tamañoTrazo.setValue(transSize);
+        if(transportador.isVisible()){
+            transportador.setVisible(false);
+        }
+        else{
+            transportador.setVisible(true);
+            colorTrazo.setValue(transColor);
+            tamañoTrazo.setValue(transSize);
+        }
     }
 
     @FXML
     private void mouseMovedMap(MouseEvent e) {
+        
     }
 
     //Does not work dont know why
@@ -274,6 +336,13 @@ public class FXMLDocumentController implements Initializable {
         }
         transColor = colorTrazo.getValue();
         transSize = tamañoTrazo.getValue();
+    }
+
+    @FXML
+    private void lineSelected(ActionEvent event) {
+        colorTrazo.setValue(lineColor);
+        tamañoTrazo.setValue(lineSize);
+        previewCircle.setVisible(false);
     }
 
 }
