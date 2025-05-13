@@ -18,6 +18,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Text?>
 
 <VBox prefHeight="556.0" prefWidth="853.0" stylesheets="@/poiupv/resources/estilos.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="poiupv.FXMLDocumentController">
@@ -44,13 +45,13 @@
             </AnchorPane>
             <ScrollPane fx:id="map_scrollpane" hbarPolicy="ALWAYS" hvalue="0.5" pannable="true" prefHeight="398.0" prefWidth="358.0" vbarPolicy="ALWAYS" vvalue="0.5">
                <content>
-                  <StackPane onScroll="#zoomScroll">
+                  <StackPane fx:id="stackPane" onMouseClicked="#mapClicked" onMouseDragged="#removeMovement" onMouseMoved="#showPosition" onScroll="#zoomScroll">
                      <children>
-                        <Pane fx:id="previwePane" onMouseClicked="#mapClicked" onMouseMoved="#showPosition">
+                        <Pane fx:id="previwePane">
                            <children>
-                              <Pane fx:id="card" onMouseDragged="#mouseMovedMap">
+                              <Pane fx:id="card">
                                  <children>
-                                    <ImageView pickOnBounds="true">
+                                    <ImageView layoutX="-456.0" layoutY="-106.0" pickOnBounds="true">
                                        <image>
                                           <Image url="@../../resources/carta_nautica.png" />
                                        </image>
@@ -59,7 +60,8 @@
                               </Pane>
                            </children>
                         </Pane>
-                        <Button fx:id="transportador" mnemonicParsing="false" onMouseClicked="#transportadorClicked" onMouseDragged="#transportadorDragged" styleClass="transportador" text="Button" visible="false" />
+                        <Button fx:id="transportador" mnemonicParsing="false" styleClass="transportador" text="Button" visible="false" />
+                        <Rectangle fx:id="hitBox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" onMouseDragged="#transportadorDragged" onMousePressed="#transportadorClicked" stroke="BLACK" strokeType="INSIDE" visible="false" width="200.0" />
                      </children>
                   </StackPane>
                </content>
@@ -83,7 +85,7 @@
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>
                   </ToggleButton>
-                  <ToggleButton toggleGroup="$paintingOptions">
+                  <ToggleButton fx:id="textButton" onAction="#textSelected" toggleGroup="$paintingOptions">
                      <graphic>
                         <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>

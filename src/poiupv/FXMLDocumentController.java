@@ -55,6 +55,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -85,6 +86,9 @@ public class FXMLDocumentController implements Initializable {
     private Color transColor;
     private double transSize;
     
+    //text atributes
+    private Color textColor;
+    private double textSize;
     
 
     @FXML
@@ -116,6 +120,12 @@ public class FXMLDocumentController implements Initializable {
     private ToggleButton lineButton;
     @FXML
     private Pane previwePane;
+    @FXML
+    private StackPane stackPane;
+    @FXML
+    private Rectangle hitBox;
+    @FXML
+    private ToggleButton textButton;
     
     // esta funcion es invocada al cambiar el value del slider zoom_slider
     private void zoom(double scaleValue) {
@@ -157,21 +167,41 @@ public class FXMLDocumentController implements Initializable {
         
         //initialize the preview circle
         previewCircle = new Circle();
+        previewCircle.visibleProperty().bind(pointButton.selectedProperty());
         previwePane.getChildren().add(previewCircle);
         //default values
         pointColor = Color.RED;
         pointSize = 10;
 
         //trans
-        transportador.styleProperty().bind(Bindings.createStringBinding(() -> 
-        "-fx-pref-width: " + (int)tamañoTrazo.getValue()*100 + ";" +
-        "-fx-pref-height: " + (int)tamañoTrazo.getValue()*100 + ";" +
-        "-fx-content-display: graphic-only;",
-        tamañoTrazo.valueProperty()
-        ));
+        //Deepseek para la base del codigo del Binding
+        transportador.styleProperty().bind(Bindings.createStringBinding(() -> {
+            Color color = colorTrazo.getValue();
+            // Formato RGBA (red, green, blue, alpha)
+            String rgbaColor = String.format("rgba(%d, %d, %d, %f)",
+                (int)(color.getRed() * 255),
+                (int)(color.getGreen() * 255),
+                (int)(color.getBlue() * 255),
+                color.getOpacity());
+
+            return "-fx-background-color: " + rgbaColor + ";"+
+                   "-fx-pref-width: " + (int)tamañoTrazo.getValue()*100 + ";" +
+                   "-fx-pref-height: " + (int)tamañoTrazo.getValue()*100 + ";" +
+                   "-fx-content-display: graphic-only;";
+        }, colorTrazo.valueProperty(),tamañoTrazo.valueProperty()));
         //default values
-        transColor = Color.RED;
+        transColor = Color.RED; 
         transSize = 3;
+        transportador.setMouseTransparent(true);
+        transportador.setFocusTraversable(false);
+        hitBox.widthProperty().bind(transportador.widthProperty());
+        hitBox.heightProperty().bind(transportador.heightProperty());
+        hitBox.xProperty().bind(transportador.layoutXProperty());
+        hitBox.yProperty().bind(transportador.layoutYProperty());
+        hitBox.setFill(Color.TRANSPARENT);
+        hitBox.setStroke(Color.TRANSPARENT);
+        
+        card.getChildren().add(hitBox);
         
         //Line
         previewLine = new Line();
@@ -181,6 +211,9 @@ public class FXMLDocumentController implements Initializable {
         lineColor = Color.RED;
         lineSize = 2;
         
+        //text
+        textColor = Color.BLACK;
+        textSize = 5;
     }
 
     @FXML
@@ -190,17 +223,27 @@ public class FXMLDocumentController implements Initializable {
         if(pointButton.isSelected()){
                 previewCircle.setCenterX(e.getX());
                 previewCircle.setCenterY(e.getY());
-                previewCircle.setRadius(tamañoTrazo.getValue());
-                previewCircle.setFill(colorTrazo.getValue());
+                if(!transportadorButton.isSelected()){
+                    previewCircle.setRadius(tamañoTrazo.getValue());
+                    previewCircle.setFill(colorTrazo.getValue());
+                }else{
+                    previewCircle.setRadius(pointSize);
+                    previewCircle.setFill(pointColor);
+                }
         }
         if(lineButton.isSelected()){
             if(previewLine.isVisible()){
                 previewLine.setEndX(e.getX());
                 previewLine.setEndY(e.getY());
-                previewLine.setStrokeWidth(tamañoTrazo.getValue());
-                previewLine.setStroke(colorTrazo.getValue());
+                if(!transportadorButton.isSelected()){
+                    previewLine.setStrokeWidth(tamañoTrazo.getValue());
+                    previewLine.setStroke(colorTrazo.getValue());
+                }else{
+                    previewLine.setStrokeWidth(lineSize);
+                    previewLine.setStroke(lineColor);
+                }
             }
-        }
+        }else previewLine.setVisible(false);
     }
 
     private void closeApp(ActionEvent event) {
@@ -223,10 +266,10 @@ public class FXMLDocumentController implements Initializable {
     private void mapClicked(MouseEvent e) {
         if(e.getButton()==MouseButton.PRIMARY){
             if(pointButton.isSelected()){
-                Color color = colorTrazo.getValue();
-                pointColor = color;
-                double size = tamañoTrazo.getValue();
-                pointSize = size;
+                if(!transportadorButton.isSelected()){
+                    pointColor = colorTrazo.getValue();
+                    pointSize = tamañoTrazo.getValue();
+                }
                 Circle circle = new Circle();
                 circle.setOnMouseClicked(e2 -> {
                     if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
@@ -235,8 +278,8 @@ public class FXMLDocumentController implements Initializable {
                 });
                 circle.setCenterX(e.getX());
                 circle.setCenterY(e.getY());
-                circle.setRadius(size);
-                circle.setFill(color);
+                circle.setRadius(pointSize);
+                circle.setFill(pointColor);
 
                 card.getChildren().add(circle);
             }
@@ -249,19 +292,23 @@ public class FXMLDocumentController implements Initializable {
                     previewLine.setVisible(true);
                     
                 }else{
-                    Color color = colorTrazo.getValue();
-                    lineColor = color;
-                    double size = tamañoTrazo.getValue();
-                    lineSize = size;
+                    if(!transportadorButton.isSelected()){
+                        lineColor  = colorTrazo.getValue();
+                        lineSize = tamañoTrazo.getValue();
+                    }
                     Line line = new Line(previewLine.getStartX(),previewLine.getStartY(),e.getX(),e.getY());
-                    line.setStrokeWidth(size);
-                    line.setStroke(color);
+                    line.setOnMouseClicked(e2 -> {
+                    if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
+                        ((Pane)line.getParent()).getChildren().remove(line);
+                    }
+                });
+                    line.setStrokeWidth(lineSize);
+                    line.setStroke(lineColor);
                     
                     card.getChildren().add(line);
                     previewLine.setVisible(false);
                 }
             }
-            e.consume();
         }
     }
 
@@ -297,52 +344,71 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void pointSelected(ActionEvent event) {
-        colorTrazo.setValue(pointColor);
-        tamañoTrazo.setValue(pointSize);
-        previewCircle.setVisible(true);
+        if(!transportadorButton.isSelected()){
+            colorTrazo.setValue(pointColor);
+            tamañoTrazo.setValue(pointSize);
+        }
     }
 
     @FXML
     private void transportadorSelected(ActionEvent event) {
         if(transportador.isVisible()){
             transportador.setVisible(false);
+            hitBox.setVisible(false);
+            if(pointButton.isSelected()){
+                colorTrazo.setValue(pointColor);
+                tamañoTrazo.setValue(pointSize);
+            } else if(lineButton.isSelected()){
+                colorTrazo.setValue(lineColor);
+                tamañoTrazo.setValue(lineSize);
+            }
         }
         else{
             transportador.setVisible(true);
+            hitBox.setVisible(true);
             colorTrazo.setValue(transColor);
             tamañoTrazo.setValue(transSize);
         }
     }
 
-    @FXML
-    private void mouseMovedMap(MouseEvent e) {
-        
-    }
 
-    //Does not work dont know why
     @FXML
     private void transportadorDragged(MouseEvent e) {
         if(e.getButton()==MouseButton.PRIMARY){
-            transportador.setTranslateX(e.getX()+ transportador.getLayoutX() -TransX);
-            transportador.setTranslateY(e.getY()+ transportador.getLayoutX() -TransY);
+            transportador.setTranslateX(e.getSceneX() - TransX);
+            transportador.setTranslateY(e.getSceneY()- TransY );
+            hitBox.setTranslateX(e.getSceneX() - TransX);
+            hitBox.setTranslateY(e.getSceneY() - TransY);
+            e.consume();
         }
     }
 
     @FXML
     private void transportadorClicked(MouseEvent e) {
         if(e.getButton()==MouseButton.PRIMARY){
-            TransX = e.getX();
-            TransY = e.getY();
+            TransX = e.getSceneX();
+            TransY = e.getSceneY();
         }
-        transColor = colorTrazo.getValue();
-        transSize = tamañoTrazo.getValue();
+        e.consume();
     }
 
     @FXML
     private void lineSelected(ActionEvent event) {
-        colorTrazo.setValue(lineColor);
-        tamañoTrazo.setValue(lineSize);
-        previewCircle.setVisible(false);
+        if(!transportadorButton.isSelected()){
+            colorTrazo.setValue(lineColor);
+            tamañoTrazo.setValue(lineSize);
+        }
+    }
+
+    @FXML
+    private void removeMovement(MouseEvent e) {
+        if(e.getButton()==MouseButton.PRIMARY){
+            e.consume();
+        }
+    }
+
+    @FXML
+    private void textSelected(ActionEvent event) {
     }
 
 }
