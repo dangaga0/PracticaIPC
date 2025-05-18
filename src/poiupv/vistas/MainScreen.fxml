@@ -1,138 +1,177 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Arc?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.text.Text?>
 
 <VBox prefHeight="556.0" prefWidth="853.0" stylesheets="@/poiupv/resources/estilos.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="poiupv.FXMLDocumentController">
    <children>
-      <SplitPane fx:id="splitPane" dividerPositions="0.19699727024567792, 0.5" VBox.vgrow="ALWAYS">
-         <items>
-            <AnchorPane>
+      <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308">
+         <children>
+              <ToggleButton fx:id="pointButton" onAction="#pointSelected">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../resources/ring2.0.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <toggleGroup>
+                  <ToggleGroup fx:id="paintingOptions" />
+               </toggleGroup>
+              </ToggleButton>
+            <ToggleButton fx:id="lineButton" onAction="#lineSelected" toggleGroup="$paintingOptions">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="arcButton" onAction="#arcSelected" toggleGroup="$paintingOptions">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="textButton" onAction="#textSelected" toggleGroup="$paintingOptions">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="eraserButton" toggleGroup="$paintingOptions">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+            </ToggleButton>
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity">
                <children>
-                  <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Para acceder al apartado de preguntas debe Iniciar sesion&#10;con su usuario o registrar uno si no tiene.">
-                           <VBox.margin>
-                              <Insets />
-                           </VBox.margin>
-                        </Text>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#iniciarSe" text="Iniciar Sesion" underline="true" />
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#registrarse" text="Regitrarse" />
-                     </children>
-                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                  </VBox>
-               </children>
-            </AnchorPane>
-            <ScrollPane fx:id="map_scrollpane" hbarPolicy="ALWAYS" hvalue="0.5" pannable="true" prefHeight="398.0" prefWidth="358.0" vbarPolicy="ALWAYS" vvalue="0.5">
-               <content>
-                  <StackPane fx:id="stackPane" onMouseClicked="#mapClicked" onMouseDragged="#removeMovement" onMouseMoved="#showPosition" onScroll="#zoomScroll">
-                     <children>
-                        <Pane fx:id="previwePane">
-                           <children>
-                              <Pane fx:id="card">
-                                 <children>
-                                    <ImageView layoutX="-456.0" layoutY="-106.0" pickOnBounds="true">
-                                       <image>
-                                          <Image url="@../../resources/carta_nautica.png" />
-                                       </image>
-                                    </ImageView>
-                                 </children>
-                              </Pane>
-                           </children>
-                        </Pane>
-                        <Button fx:id="transportador" mnemonicParsing="false" styleClass="transportador" text="Button" visible="false" />
-                        <Rectangle fx:id="hitBox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" onMouseDragged="#transportadorDragged" onMousePressed="#transportadorClicked" stroke="BLACK" strokeType="INSIDE" visible="false" width="200.0" />
-                     </children>
-                  </StackPane>
-               </content>
-            </ScrollPane>
-            <VBox alignment="TOP_RIGHT" maxWidth="-Infinity">
-               <children>
-                    <ToggleButton fx:id="pointButton" onAction="#pointSelected">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../resources/ring2.0.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <toggleGroup>
-                        <ToggleGroup fx:id="paintingOptions" />
-                     </toggleGroup>
-                    </ToggleButton>
-                  <ToggleButton fx:id="lineButton" onAction="#lineSelected" toggleGroup="$paintingOptions">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </ToggleButton>
-                  <ToggleButton fx:id="textButton" onAction="#textSelected" toggleGroup="$paintingOptions">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </ToggleButton>
-                  <ToggleButton fx:id="eraserButton" toggleGroup="$paintingOptions">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </ToggleButton>
-                  <ToggleButton fx:id="transportadorButton" onAction="#transportadorSelected">
-                     <graphic>
-                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../resources/transportador.png" />
-                           </image></ImageView>
-                     </graphic>
-                  </ToggleButton>
-                  <VBox alignment="BOTTOM_RIGHT" maxWidth="1.7976931348623157E308" prefWidth="0.0" VBox.vgrow="ALWAYS">
-                     <children>
-                        <Separator prefWidth="200.0">
-                           <padding>
-                              <Insets bottom="5.0" top="5.0" />
-                           </padding>
-                        </Separator>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Tamaño" textAlignment="CENTER" wrappingWidth="42.65625">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </VBox.margin>
-                        </Text>
-                        <Slider fx:id="tamañoTrazo" max="40.0" maxWidth="1.7976931348623157E308" min="1.0" orientation="VERTICAL" value="20.0" />
-                        <Separator prefWidth="200.0">
-                           <padding>
-                              <Insets bottom="5.0" top="5.0" />
-                           </padding>
-                        </Separator>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Color" textAlignment="CENTER" wrappingWidth="44.5703125">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </VBox.margin>
-                        </Text>
-                        <ColorPicker fx:id="colorTrazo" />
-                     </children>
-                  </VBox>
+                  <Label fx:id="tamTex" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Tamaño" textAlignment="CENTER" />
+                  <Slider fx:id="tamañoTrazo" max="60.0" min="1.0" value="30.0" />
                </children>
             </VBox>
-         </items>
-      </SplitPane>
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity">
+               <children>
+                  <Label fx:id="colText" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Color" textAlignment="CENTER" />
+                  <ColorPicker fx:id="colorTrazo" />
+               </children>
+            </VBox>
+            <Separator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </Separator>
+            <ToggleButton fx:id="transportadorButton" onAction="#transportadorSelected">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../resources/transportador.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="rulerButton" mnemonicParsing="false" onAction="#rulerSelected">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+            </ToggleButton>
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity">
+               <children>
+                  <Label fx:id="tamTexR" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Tamaño" textAlignment="CENTER" />
+                  <Slider fx:id="tamañoTrazoR" max="40.0" min="1.0" value="20.0" />
+               </children>
+            </VBox>
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity">
+               <children>
+                  <Label fx:id="colTextR" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Color" textAlignment="CENTER" />
+                  <ColorPicker fx:id="colorTrazoR" />
+               </children>
+            </VBox>
+            <Separator maxWidth="-Infinity" orientation="VERTICAL">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </Separator>
+            <Button fx:id="trashButton" mnemonicParsing="false" onAction="#remove">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" />
+               </graphic>
+            </Button>
+            <Region maxHeight="-Infinity" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+            <Separator maxWidth="-Infinity" orientation="VERTICAL">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </HBox.margin>
+            </Separator>
+            <HBox alignment="CENTER_RIGHT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308">
+               <children>
+                  <MenuButton mnemonicParsing="false" text="Problemas">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Elegir Problema" />
+                      <MenuItem mnemonicParsing="false" text="Problema Aleatorio" />
+                    </items>
+                  </MenuButton>
+                  <Button mnemonicParsing="false" text="Button" />
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
+      <ScrollPane fx:id="map_scrollpane" hbarPolicy="ALWAYS" hvalue="0.5" pannable="true" vbarPolicy="ALWAYS" vvalue="0.5">
+         <content>
+            <StackPane fx:id="stackPane" onMouseClicked="#mapClicked" onMouseDragged="#removeMovement" onMouseMoved="#showPosition" onScroll="#zoomScroll">
+               <children>
+                  <Pane fx:id="previwePane">
+                     <children>
+                        <Pane fx:id="card">
+                           <children>
+                              <ImageView layoutX="67.0" layoutY="-304.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../../resources/carta_nautica.png" />
+                                 </image>
+                              </ImageView>
+                              <Rectangle fx:id="hitBox" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="331.0" layoutX="4348.0" layoutY="2715.0" onMouseDragged="#transportadorDragged" onMousePressed="#transportadorClicked" stroke="BLACK" strokeType="INSIDE" visible="false" width="331.0">
+                                 <cursor>
+                                    <Cursor fx:constant="OPEN_HAND" />
+                                 </cursor></Rectangle>
+                              <Button fx:id="transportador" layoutX="4338.0" layoutY="2705.0" mnemonicParsing="false" prefHeight="331.0" prefWidth="331.0" styleClass="transportador" text="Button" visible="false" />
+                           </children>
+                        </Pane>
+                        <Circle fx:id="previewArcCircle" fill="#1f96ff" onMouseDragged="#previewArcCircleDrag" radius="100.0" stroke="BLACK" strokeType="INSIDE" visible="false" />
+                        <Circle fx:id="previewArcRCircle" fill="DODGERBLUE" onMouseDragged="#previewArcRCircleDrag" radius="100.0" stroke="BLACK" strokeType="INSIDE" visible="false">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Circle>
+                        <Circle fx:id="previewArcLCircle" fill="DODGERBLUE" onMouseDragged="#previewArcLCircleDrag" radius="100.0" stroke="BLACK" strokeType="INSIDE" visible="false">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Circle>
+                        <Arc fx:id="previewArc" fill="DODGERBLUE" length="270.0" radiusX="100.0" radiusY="100.0" startAngle="45.0" stroke="BLACK" strokeType="INSIDE" visible="false" />
+                     </children>
+                  </Pane>
+               </children>
+            </StackPane>
+         </content>
+      </ScrollPane>
       <HBox alignment="CENTER_RIGHT">
          <children>
             <Region HBox.hgrow="ALWAYS" />
@@ -140,7 +179,7 @@
                <HBox.margin>
                   <Insets right="5.0" />
                </HBox.margin></Label>
-            <Slider fx:id="zoom_slider" prefHeight="14.0" HBox.hgrow="SOMETIMES" />
+            <Slider fx:id="zoom_slider" max="130.0" prefHeight="14.0" HBox.hgrow="SOMETIMES" />
             <Label fx:id="mousePosition" minHeight="-Infinity" minWidth="-Infinity" text="SceneX:     ScenY:     " wrapText="true" HBox.hgrow="ALWAYS">
                <padding>
                   <Insets left="5.0" />
