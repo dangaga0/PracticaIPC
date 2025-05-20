@@ -33,6 +33,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -78,7 +79,6 @@ public class FXMLDocumentController implements Initializable {
     // la variable zoomGroup se utiliza para dar soporte al zoom
     // el escalado se realiza sobre este nodo, al escalar el Group no mueve sus nodos
     private Group zoomGroup;
-    private double TransX, TransY;
     
     // Point atributes
     private Color pointColor;
@@ -90,11 +90,6 @@ public class FXMLDocumentController implements Initializable {
     private double lineSize;
     private Line previewLine;
     
-    
-    //Trasportador atributos
-    private Color transColor;
-    private double transSize;
-    
     //text atributes
     private Color textColor;
     private double textSize;
@@ -104,6 +99,16 @@ public class FXMLDocumentController implements Initializable {
     private Color arcColor;
     private double arcSize;
     private DoubleProperty arcRad;
+    
+    //Trasportador atributos
+    private Color transColor;
+    private double transSize;
+    private double TransX, TransY;
+    
+    //ruler
+    private double TransXR, TransYR;
+    double rotationAngle;
+    
     
     @FXML
     private Circle previewArcCircle;
@@ -119,7 +124,6 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Slider zoom_slider;
     
-    @FXML
     private Label mousePosition;
     @FXML
     private ToggleGroup paintingOptions;
@@ -165,6 +169,8 @@ public class FXMLDocumentController implements Initializable {
     private ToggleButton rulerButton;
     @FXML
     private Button trashButton;
+    @FXML
+    private Button regla;
     
     // esta funcion es invocada al cambiar el value del slider zoom_slider
     private void zoom(double scaleValue) {
@@ -192,7 +198,7 @@ public class FXMLDocumentController implements Initializable {
         // inicializamos el slider y enlazamos con el zoom
         zoom_slider.setMin(0.2);
         zoom_slider.setMax(1.5);
-        zoom_slider.setValue(1.0);
+        zoom_slider.setValue(.4);
         zoom_slider.valueProperty().addListener((o, oldVal, newVal) -> zoom((Double) newVal));
 
         //=========================================================================
@@ -234,15 +240,15 @@ public class FXMLDocumentController implements Initializable {
             .otherwise("-fx-text-fill: black;")
         );
         
-        colorTrazoR.disableProperty().bind(transportadorButton.selectedProperty().not());
-        tamañoTrazoR.disableProperty().bind(transportadorButton.selectedProperty().not());
+        colorTrazoR.disableProperty().bind(Bindings.and(transportadorButton.selectedProperty().not(), rulerButton.selectedProperty().not()));
+        tamañoTrazoR.disableProperty().bind(Bindings.and(transportadorButton.selectedProperty().not(), rulerButton.selectedProperty().not()));
         tamTexR.styleProperty().bind(
-            Bindings.when(transportadorButton.selectedProperty().not())
+            Bindings.when(Bindings.and(transportadorButton.selectedProperty().not(), rulerButton.selectedProperty().not()))
             .then("-fx-text-fill: #cccccc;")
             .otherwise("-fx-text-fill: black;")
         );
         colTextR.styleProperty().bind(
-            Bindings.when(transportadorButton.selectedProperty().not())
+            Bindings.when(Bindings.and(transportadorButton.selectedProperty().not(), rulerButton.selectedProperty().not()))
             .then("-fx-text-fill: #cccccc;")
             .otherwise("-fx-text-fill: black;")
         );
@@ -281,7 +287,23 @@ public class FXMLDocumentController implements Initializable {
         hitBox.setFill(Color.TRANSPARENT);
         hitBox.setStroke(Color.TRANSPARENT);
         
-        
+        //ruler
+        rotationAngle = 0;
+        //regla.set
+        regla.styleProperty().bind(Bindings.createStringBinding(() -> {
+            Color color = colorTrazoR.getValue();
+            // Formato RGBA (red, green, blue, alpha)
+            String rgbaColor = String.format("rgba(%d, %d, %d, %f)",
+                (int)(color.getRed() * 255),
+                (int)(color.getGreen() * 255),
+                (int)(color.getBlue() * 255),
+                color.getOpacity());
+
+            return "-fx-background-color: " + rgbaColor + ";"+
+                   "-fx-pref-width: " + (int)tamañoTrazoR.getValue()*285 + ";" +
+                   "-fx-pref-height: " + (int)tamañoTrazoR.getValue()*14 + ";" +
+                   "-fx-content-display: graphic-only;";
+        }, colorTrazoR.valueProperty(),tamañoTrazoR.valueProperty()));
         
         //Line
         previewLine = new Line();
@@ -368,8 +390,6 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void showPosition(MouseEvent e) {
-        mousePosition.setText("sceneX: " + (int) e.getSceneX() + ", sceneY: " + (int) e.getSceneY() + "\n"
-                + "         X: " + (int) e.getX() + ",          Y: " + (int) e.getY());
         if(pointButton.isSelected()){
                 previewCircle.setCenterX(e.getX());
                 previewCircle.setCenterY(e.getY());
@@ -419,6 +439,7 @@ public class FXMLDocumentController implements Initializable {
                 pointColor = colorTrazo.getValue();
                 pointSize = tamañoTrazo.getValue();
                 Circle circle = new Circle();
+                circle.setUserData("drawing");
                 circle.setOnMouseClicked(e2 -> {
                     if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
                         ((Pane)circle.getParent()).getChildren().remove(circle);
@@ -443,6 +464,7 @@ public class FXMLDocumentController implements Initializable {
                     lineColor  = colorTrazo.getValue();
                     lineSize = tamañoTrazo.getValue();
                     Line line = new Line(previewLine.getStartX(),previewLine.getStartY(),e.getX(),e.getY());
+                    line.setUserData("drawing");
                     line.setOnMouseClicked(e2 -> {
                     if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
                         ((Pane)line.getParent()).getChildren().remove(line);
@@ -462,6 +484,7 @@ public class FXMLDocumentController implements Initializable {
                     Text text = new Text(previewText.getText());
                     text.setFill(textColor);
                     text.setFont(Font.font("Sans", textSize));
+                    text.setUserData("drawing");
                     text.setOnMouseClicked(e2 -> {
                         if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
                             ((Pane)text.getParent()).getChildren().remove(text);
@@ -495,6 +518,7 @@ public class FXMLDocumentController implements Initializable {
                     arc.setStartAngle(previewArc.getStartAngle());
                     arc.setLength(previewArc.getLength());
                     arc.setFill(null);
+                    arc.setUserData("drawing");
                     arc.setOnMouseClicked(e2 -> {
                     if (e2.getButton() == MouseButton.PRIMARY && eraserButton.isSelected()) {
                             ((Pane)arc.getParent()).getChildren().remove(arc);
@@ -529,36 +553,7 @@ public class FXMLDocumentController implements Initializable {
                 }
             }
         }
-    }
-
-    //para saber como cambiar de ventana
-    private void iniciarSe(ActionEvent e) throws IOException {
-        FXMLLoader loader= new FXMLLoader(getClass().getResource("vistas/IniciarSe.fxml"));
-        Parent root = loader.load();
-        
-        Scene scene = new Scene(root);
-        
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(scene);
-        stage.setTitle("Iniciar Sesión");
-        stage.showAndWait();
-        IniciarSeController iniCont = loader.getController();
-    }
-
-    private void registrarse(ActionEvent e) throws IOException {
-        FXMLLoader loader= new FXMLLoader(getClass().getResource("vistas/Registro.fxml"));
-        Parent root = loader.load();
-        
-        Scene scene = new Scene(root);
-        
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(scene);
-        stage.setTitle("Registrarse");
-        stage.showAndWait();
-        RegistroController regCont = loader.getController();
-    }
+    }   
 
     @FXML
     private void pointSelected(ActionEvent event) {
@@ -655,6 +650,7 @@ public class FXMLDocumentController implements Initializable {
         
         previewArcLCircle.setCenterX(previewArcCircle.getCenterX() + dxl * r/dl);
         previewArcLCircle.setCenterY(previewArcCircle.getCenterY() + dyl * r/dl);
+        e.consume();
     }
 
     @FXML
@@ -667,6 +663,7 @@ public class FXMLDocumentController implements Initializable {
 
         previewArcRCircle.setCenterX(previewArcCircle.getCenterX() + dx * r/d);
         previewArcRCircle.setCenterY(previewArcCircle.getCenterY() + dy * r/d);
+        e.consume();
         }
 
 
@@ -679,6 +676,7 @@ public class FXMLDocumentController implements Initializable {
 
         previewArcLCircle.setCenterX(previewArcCircle.getCenterX() + dx * r/d);
         previewArcLCircle.setCenterY(previewArcCircle.getCenterY() + dy * r/d);
+        e.consume();
     }
 
     
@@ -692,10 +690,89 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void rulerSelected(ActionEvent event) {
+        if(regla.isVisible()){
+            regla.setVisible(false);
+        }
+        else{
+            regla.setVisible(true);
+            colorTrazoR.setValue(transColor);
+            tamañoTrazoR.setValue(transSize);
+        }
     }
 
     @FXML
     private void remove(ActionEvent event) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Carta nautica");
+        alert.setHeaderText(null);
+        alert.setContentText("¿Quieres borrar todo el contenido\n dibujado en la carta?");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK){
+            Platform.runLater(() -> {
+                for (int i = card.getChildren().size() - 1; i >= 0; i--) {
+                    Node node = card.getChildren().get(i);
+                    if ("drawing".equals(node.getUserData())) {
+                    card.getChildren().remove(i);
+                    }
+                }
+            }); 
+        }
     }
 
+    @FXML
+    private void rulerPre(MouseEvent e) {
+        if(e.getButton() == MouseButton.PRIMARY) {
+            TransXR = e.getX() - regla.getLayoutX();
+            TransYR = e.getY() - regla.getLayoutY();
+            transColor = colorTrazoR.getValue();
+            transSize = tamañoTrazoR.getValue();
+            regla.toFront();
+        }
+    }
+
+    @FXML
+    private void rulerDra(MouseEvent e) {
+        if(e.getButton() == MouseButton.PRIMARY) {
+            regla.setLayoutX(e.getX() - TransXR);
+            regla.setLayoutY(e.getY() - TransYR);
+        }
+    }
+
+    @FXML
+    private void rulerScr(ScrollEvent e) {
+    double deltaY = e.getDeltaY();
+    
+    if (deltaY > 0) {
+        rotationAngle += .5;
+    } else {
+        rotationAngle -= .5;
+    }
+    
+    rotationAngle = rotationAngle % 360;
+   
+    regla.setRotate(rotationAngle);
+    
+    e.consume();
+    }
+
+
+    @FXML
+    private void openProfile(ActionEvent event) throws IOException {
+        //Base Code
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("vistas/Registro.fxml"));
+        Parent root = loader.load();
+        
+        Scene scene = new Scene(root);
+        
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(scene);
+        stage.setTitle("Iniciar Sesión");
+        stage.showAndWait();
+        IniciarSeController iniCont = loader.getController();
+    }
+
+    @FXML
+    private void openTest(ActionEvent event) {
+    }
 }
