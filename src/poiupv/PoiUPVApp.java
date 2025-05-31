@@ -6,17 +6,21 @@
 package poiupv;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import model.User;
 
 /**
  *
  * @author jose
  */
 public class PoiUPVApp extends Application {
+    
+    static private User user;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -26,6 +30,10 @@ public class PoiUPVApp extends Application {
         stage.setTitle("Carta Nautica");
         stage.setScene(scene);
         stage.show();
+                
+        stage.setOnCloseRequest(event -> {
+            if(user!=null) user.addSession(ProblemasController.getHits(), ProblemasController.getFails());
+        });
     }
 
     /**
@@ -35,4 +43,11 @@ public class PoiUPVApp extends Application {
         launch(args);
     }
     
+    static public void setUser(User u){
+        user = u;
+    }
+    
+    static public User getUser(){
+        return user;
+    }
 }
